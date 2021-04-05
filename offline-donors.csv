@@ -1,0 +1,9 @@
+campaign_id,name,email,amount,affiliation,affiliation_value,designation_name,designated_amount
+16,Lee Irvine,lee@comcast.net,150.67,Parent,2005,Athletics,150.67
+16,Clara Allen,callen92@sbcglobal.net,2000.0,,,Area of Greatest Need,2000
+18,Clara Allen,callen92@sbcglobal.net,300.0,,,College of Education,2000
+16,Sandra Bentz,bn3859@gmail.com,500.0,Friend,,,
+16,Ken Erickson,KennethMErickson@dayrep.com,35000.0,Alumni,1982,Area of Greatest Need,35000
+16,ken erickson,kennethmErickson@dayrep.com,2000.0,Alumni,1982,Mission and Ministry,2000
+25,Lara Holloway,lholloway482@rhyta.com,19.27,Alumni,2018,College of Veterinary Medicine,19.27
+16,Nathan Fowler,nfowler202@gmail.com,500.0,Parent,,Student Financial Aid,500.0
