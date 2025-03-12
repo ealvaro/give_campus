@@ -49,4 +49,4 @@ out = []
 grp.each do |g|
   out << { name: g[0], donors: cnt[g[0]], dollars: g[1] } unless g[0].nil?
 end
-puts out.to_json
+puts JSON.pretty_generate(out)
