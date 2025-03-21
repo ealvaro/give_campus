@@ -1,52 +1,44 @@
-# Input
-# frozen_string_literal: true
-
-# files offline-donors.csv & online-donors.csv
-
-# Output
-# [
-#  {
-#  name: "Area of Greatest Need",
-#  donors: 2,
-#  dollars: 37000
-#  }
-#
-# ]
-
 require 'csv'
 require 'json'
 
-grp = Hash.new(0)
-cnt = Hash.new(0)
+amounts = Hash.new(0.0)
+donor_counts = Hash.new(0)
 
-def load_offline(grp, cnt)
-  CSV.open('offline-donors.csv', headers: true).each do |line|
-    name = line['designation_name']
-    unless name.nil? || name.empty?
-      grp[name] += line['amount'].to_f
-      cnt[name] += 1
+def process_csv(file)
+  CSV.foreach(file, headers: true) { |row| yield row }
+end
+
+# Process offline donors
+process_csv('offline-donors.csv') do |row|
+  name = row['designation_name'].to_s.strip
+  next if name.empty?
+
+  amounts[name] += row['amount'].to_f
+  donor_counts[name] += 1
+end
+
+# Process online donors
+process_csv('online-donors.csv') do |row|
+  designation_json = row['designation'].to_s.strip
+  next if designation_json.empty?
+
+  begin
+    JSON.parse(designation_json).each do |name, amt|
+      name = name.to_s.strip
+      next if name.empty?
+
+      amounts[name] += amt.to_f
+      donor_counts[name] += 1
     end
+  rescue JSON::ParserError
+    # Skip rows with invalid JSON in designation
+    next
   end
 end
 
-def load_online(grp, cnt)
-  CSV.open('online-donors.csv', headers: true).each do |line|
-    des = JSON.parse line['designation']
-    next if des.empty?
-
-    des.each do |g|
-      name = g[0]
-      grp[name] += g[1].to_f
-      cnt[name] += 1
-    end
-  end
+# Build and output the result
+output = amounts.map do |name, total|
+  { name: name, donors: donor_counts[name], dollars: total }
 end
 
-load_offline(grp, cnt)
-load_online(grp, cnt)
-
-out = []
-grp.each do |g|
-  out << { name: g[0], donors: cnt[g[0]], dollars: g[1] } unless g[0].nil?
-end
-puts JSON.pretty_generate(out)
+puts JSON.pretty_generate(output)
