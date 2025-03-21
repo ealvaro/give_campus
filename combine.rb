@@ -11,7 +11,7 @@ end
 # Process offline donors
 process_csv('offline-donors.csv') do |row|
   name = row['designation_name'].to_s.strip
-  next if name.empty?
+  name = "undefined" if name.empty?
 
   amounts[name] += row['amount'].to_f
   donor_counts[name] += 1
@@ -23,15 +23,15 @@ process_csv('online-donors.csv') do |row|
   next if designation_json.empty?
 
   begin
-    JSON.parse(designation_json).each do |name, amt|
-      name = name.to_s.strip
-      next if name.empty?
+    JSON.parse(designation_json).each do |designation_name, donation_amt|
+      name = designation_name.to_s.strip
+      name = "undefined" if name.empty?
 
-      amounts[name] += amt.to_f
+      amounts[name] += donation_amt.to_f
       donor_counts[name] += 1
     end
   rescue JSON::ParserError
-    # Skip rows with invalid JSON in designation
+    # Skip rows with invalid JSON in the designation column
     next
   end
 end
