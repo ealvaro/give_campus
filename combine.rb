@@ -5,6 +5,7 @@ amounts = Hash.new(0.0)
 donor_counts = Hash.new(0)
 json_error_amount = 0.0
 json_error_count = 0
+json_error_rows = []  # Array to capture complete rows with JSON parse errors
 
 def process_csv(file)
   CSV.foreach(file, headers: true) { |row| yield row }
@@ -33,20 +34,27 @@ process_csv('online-donors.csv') do |row|
       donor_counts[name] += 1
     end
   rescue JSON::ParserError
-    # Accumulate the donation amount from the row for JSON parse errors
+    # Accumulate error donation data and record the complete row
     json_error_amount += row['amount'].to_f
     json_error_count += 1
+    json_error_rows << row.to_h
   end
 end
 
-# Build aggregated valid donation groups
+# Build aggregated donation groups from valid rows
 aggregated = amounts.map do |name, total|
   { name: name, donors: donor_counts[name], dollars: total }
 end
 
-# Append error entry if any JSON parse errors occurred
+# Append aggregated JSON parse error summary if any error occurred
 if json_error_count > 0
   aggregated << { name: "JSON parse error", donors: json_error_count, dollars: json_error_amount }
 end
 
-puts JSON.pretty_generate(aggregated)
+# Final output with both aggregated results and error rows
+output = {
+  aggregated: aggregated,
+  json_parse_errors: json_error_rows
+}
+
+puts JSON.pretty_generate(output)
